@@ -28,9 +28,9 @@
 
 单例模式：确保一个类有且仅有一个实例，并为它提供一个全局访问点。
 单例和线程：建议使用属于当前类的锁进行同步。(Object classLock=Factory.class
-												synchronized(classLock){
-													……
-												})
+						synchronized(classLock){
+							……
+						})
 单例模式常常会引入一些耦合。应该减少运用单例模式的类的数量：最好的方式是，类只需知道与它协作的对象，
 却不必了解创建它所需要的限制。
 
