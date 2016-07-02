@@ -246,3 +246,12 @@
 			定义类型，就可以返回实例化完成的对象实例。
 				BeanWrapper定义继承了org.springframework.beans.PropertyAccessor接口，可以以统一的方式对对象属性进行访问； 
 			BeanWrapper定义同时又直接或者间接继承了PropertyEditorRegistry和TypeConverter接口。
+		（2）、Aware接口
+				BeanFactory：
+					org.springframework.beans.factory.BeanNameAware：beanName设置
+					org.springframework.beans.factory.BeanClassLoaderAware：将对应加载当前bean的Classloader注入当前对象实例。
+					org.springframework.beans.factory.BeanFactoryAware：将BeanFactory注入当前对象实例。
+				Application：
+					org.springframework.context.ResourceLoaderAware：将当前ApplicationContext自身设置到对象实例。
+					org.springframework.context.ApplicationEventPublisherAware：ApplicationContext作为一个容器，同时还实现了
+				
