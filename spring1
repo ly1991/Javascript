@@ -231,4 +231,18 @@
 		org.springframework.beans.factory.config.PropertyPlaceholderConfigurer和
 		org.springframework.beans.factory.config.PropertyOverrideConfigurer是两个比较常用的BeanFactoryPostProcessor。
 		Spring还允许我们通过org.springframework.beans.factory.config.CustomEditorConfigurer来注册自定义的PropertyEditor以补助容器中默认的PropertyEditor。
-				
+					
+	4.4.3、bean的一生
+		getBean()方法第一次被调用时，不管是显式的还是隐式的， Bean实例化阶段的活动才会被触发，第二次被调用则会直接返回
+	容器缓存的第一次实例化完的对象实例（ prototype类型bean除外）。
+		Bean的实例化过程：
+		实例化bean对象；设置对象属性；检查Aware相关接口并设置相关依赖；
+		BeanPostProcessor前置处理；检查是否是InitializingBean以绝对是否调用afterProperties方法；检查时候配置有自定义的init-method；BeanPostProcessor后置处理；
+		注册必要的Destruction相关回调接口；使用中；是否实现DisposableBean接口；是否配置有自定义的destory方法。
+		（1）、Bean的实例化与BeanWrapper（设置或获取对象属性值）
+				容器在内部实现的时候，采用“策略模式（ Strategy Pattern）”来决定采用何种方式初始化bean实例。通常，可以通过反射
+			或者CGLIB动态字节码生成来初始化相应的bean实例或者动态生成其子类。
+				容器只要根据相应bean定义的BeanDefintion取得实例化信息，结合CglibSubclassingInstantiationStrategy以及不同的bean
+			定义类型，就可以返回实例化完成的对象实例。
+				BeanWrapper定义继承了org.springframework.beans.PropertyAccessor接口，可以以统一的方式对对象属性进行访问； 
+			BeanWrapper定义同时又直接或者间接继承了PropertyEditorRegistry和TypeConverter接口。
