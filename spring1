@@ -146,5 +146,72 @@
 				Class getObjectType();
 				boolean isSingleton();
 			}
+	4.3.7、偷梁换柱
+		方法注入（Method Injection）、方法替换（Method Replacement）
+		虽然FXNewsBean拥有prototype类型的scope，但当容器将一个FXNewsBean的实例注入MockNewsPersister之后， MockNewsPersister
+	就会一直持有这个FXNewsBean实例的引用。虽然每次输出都调用了getNewsBean()方法并返回了 FXNewsBean 的实例，但实际上每次
+	返回的都是MockNewsPersister持有的容器第一次注入的实例。
+		解决问题的关键在于保证getNewsBean()方法每次从容器中取得新的FXNewsBean实例，而不是每次都返回其持有的单一实例。
+		（1）、方法注入
+			让getNewsBean方法声明符合规定的格式，并在配置文件中通知容器，当该方法被调用的时候，每次返回指定类型的对象实例即可。
+			方法声明需要符合的规格定义如下：				
+			<public|protected> [abstract] <return-type> theMethodName(no-arguments)；
+			该方法必须能够被子类实现或者覆写，因为容器会为我们要进行方法注入的对象使用Cglib动态生成一个子类实现，从而替代当前对象。
+			<bean id="newsBean" class="..domain.FXNewsBean" singleton="false">
+			</bean>
+			<bean id="mockPersister" class="..impl.MockNewsPersister">
+				<lookup-method name="getNewsBean" bean="newsBean"/>
+			</bean>
+		（2）、殊途同归
+			使用BeanFactoryAware接口；
+			只要在实现getNewsBean()方法的时候，能够保证每次调用BeanFactory的getBean("newsBean")，就同样可以每次都取得新的
+			FXNewsBean对象实例。现在，我们唯一需要的，就是让MockNewsPersister拥有一个BeanFactory的引用。 
+			public class MockNewsPersister implements IFXNewsPersister,BeanFactoryAware {
+				private BeanFactory beanFactory;
+				public void setBeanFactory(BeanFactory bf) throws BeansException {
+					this.beanFactory = bf;
+				}
+				public void persistNews(FXNewsBean bean) { 15
+					persistNews();
+				}
+				public void persistNews()
+				{ 
+					System.out.println("persist bean:"+getNewsBean());
+				}
+				public FXNewsBean getNewsBean() { 
+					return beanFactory.getBean("newsBean");
+				}
+			}
+			配置简化为：
+			<bean id="newsBean" class="..domain.FXNewsBean" singleton="false"></bean>
+			<bean id="mockPersister" class="..impl.MockNewsPersister"></bean>
 
+			使用ObjectFactoryCreatingFactoryBean：
+			public class MockNewsPersister implements IFXNewsPersister {
+				private ObjectFactory newsBeanFactory;
+				public void persistNews(FXNewsBean bean) {
+					persistNews();
+				}
+				public void persistNews(){
+					System.out.println("persist bean:"+getNewsBean());
+				}
+				public FXNewsBean getNewsBean() {
+					return newsBeanFactory.getObject();
+				}
+				public void setNewsBeanFactory(ObjectFactory newsBeanFactory) {
+					this.newsBeanFactory = newsBeanFactory;
+				}
+			}
+		（3）、方法替换
+			public class FXNewsProviderMethodReplacer implements MethodReplacer {
+				private static final transient Log logger = LogFactory.getLog(FXNewsProviderMethodReplacer.class);
+				public Object reimplement(Object target, Method method, Object[] args) throws Throwable {
+					logger.info("before executing method["+method.getName()+"] on Object["+target.getClass().getName()+"].");
+					
+					System.out.println("sorry,We will do nothing this time.");
+					
+					logger.info("end of executing method["+method.getName()+"] on Object["+target.getClass().getName()+"].");
+					return null;
+				}
+			}
 				
