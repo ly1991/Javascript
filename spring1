@@ -49,5 +49,102 @@
 			简化XML格式配置加载的XmlBeanFactory实现。从以上代码最后注释掉的一行，你可以看到使用了XmlBeanFactory之后，完成XML
 			的加载和BeanFactory的初始化是多么简单。
 	4.2.3、注解方式
+4.3、BeanFactory的XML之旅
+	4.3.1、<beans>和<bean>
+			<beans>
+				<description>
+				<import>
+				<bean>
+			</beans>
+			<beans>属性： 	default-lazy-init：true、false（默认值）；是否进行延迟初始化。
+							default-autowire：no（默认值）、byName、byType、constructor、autodetect；绑定方式
+							default-dependency-check：none（默认值）、objects、simple、all；依赖检查
+							default-init-method：初始化方法
+							default-destory-method：对象销毁方法
+	4.3.5、bean的scope
+		（1）、singleton
+			对象实例数量：单例
+			对象存活时间：从第一次被请求而实例化开始，只要容器不销毁或者退出，该实例就已知存活。默认scope为singleton。
+		（2）、prototype
+			容器在接到该类型对象的请求时，会每次都重新生成一个新的对象实例给请求方。请求方需要自己负责当前返回对象的后继生命
+		周期的管理工作，包括销毁。所以对于请求方不能共享使用的对象类型，应该将其定义为prototype。
+		（3）request、session、globalsession（只适用于web应用程序，通常与XmlWebApplicationContext共同使用）
+			request:XmlWebApplicationContext会为每个HTTP请求创建一个全新的RequestProcessor对象供当前请求使用，请求结束后销毁。
+			session：用户的登录信息
+			globalsession:应用在基于portlet的web应用程序中，映射到global范围的session。
+		（4）、自定义scope类型
+			实现org.springframework.beans.factory.config.Scope接口
+			public interface Scope {
+				Object get(String name, ObjectFactory objectFactory);
+				Object remove(String name);
+				void registerDestructionCallback(String name, Runnable callback);
+				String getConversationId();
+			}
+			自定义的ThreadScope：
+			public class ThreadScope implements Scope {
+				private final ThreadLocal threadScope = new ThreadLocal() {
+					protected Object initialValue() {
+						return new HashMap();
+					}
+				};
+				public Object get(String name, ObjectFactory objectFactory) {
+					Map scope = (Map) threadScope.get();
+					Object object = scope.get(name);
+					if(object==null) {
+						object = objectFactory.getObject();
+						scope.put(name, object);
+					}
+					return object;
+				}
+				public Object remove(String name) {
+					Map scope = (Map) threadScope.get();
+					return scope.remove(name);
+				}
+				public void registerDestructionCallback(String name, Runnable callback) {
+				}
+				...
+			}
+	4.3.6、工厂方法与FactoryBean
+		工厂方法模式：提供一个工厂类来实例化具体的接口实现类，主体对象只需要依赖工厂类。
+		（1）、静态工厂方法
+			假设某个第三方库发布了BarInterface，为了向使用该接口的客户端对象屏蔽以后可能对BarInterface实现类的变动，
+			同时还提供了一个静态的工厂方法实现类StaticBarInterfaceFactory，
+			public class StaticBarInterfaceFactory{
+				public static BarInterface getInstance(){
+					return new BarInterfaceImpl();
+				}
+			}
+			注入配置：
+			<bean id="foo" class="...Foo">
+				<property name="barInterface">
+					<ref bean="bar"/>
+				</property>
+			</bean>
+			<bean id="bar" class="...StaticBarInterfaceFactory" factory-method="getInstance"/>
+		（2）、非静态工厂方法
+			public class NonStaticBarInterfaceFactory{
+				public BarInterface getInstance(){
+					return new BarInterfaceImpl();
+				} 
+				...
+			}
+
+			<bean id="foo" class="...Foo">
+				<property name="barInterface">
+					<ref bean="bar"/>
+				</property>
+			</bean> 
+			<bean id="barFactory" class="...NonStaticBarInterfaceFactory"/>
+			<bean id="bar" factory-bean="barFactory" factory-method="getInstance"/>
+		（3）、FactoryBean
+			FactoryBean是Spring容器提供的一种可以扩展容器对象实例化逻辑的接口。
+			当某些对象的实例化过程过于烦琐，通过XML配置过于复杂，使我们宁愿使用Java代码来完成这个实例化过程的时候，或者，
+			某些第三方库不能直接注册到Spring容器的时候，就可以实现org.springframework.beans.factory.FactoryBean接口，
+			给出自己的对象实例化逻辑代码。
+			public interface FactoryBean {
+				Object getObject() throws Exception;
+				Class getObjectType();
+				boolean isSingleton();
+			}
 
 				
