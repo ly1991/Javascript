@@ -7,5 +7,47 @@
 	setter方法注入：优点：描述性好，可继承，允许设置默认值
 					缺点：对象无法在构造完成之后马上进入就绪状态。
 
+4、BeanFactory
+	BeanFactory：	基础类型的IOC容器，提供完整的IOC服务支持。如果没有特殊指定，默认采用延迟初始化策略（lazy-load）。只有当客户端
+				需要访问容器中的某个对象时，才对该对象进行初始化以及依赖注入操作。所以，容器启动初期速度较快，所需要的资源有限，
+				对于资源有限，并且功能要求不是很严格的场景，BeanFactory是比较合适的IOC容器选择。
+	ApplicationContext：	ApplicationContext是在BeanFactory的基础上构建的，是相对比较高级的容器实现，除了拥有BeanFactory的所有
+						支持，ApplicationContext还提供了事件发布、国际化支持等高级特性。ApplicationContext所管理的对象，在该类型
+						容器启动之后，默认全部初始化并绑定完成。所以，ApplicationContext要求更多的系统资源，启动时间也较长。在一
+						些系统资源充足，并且要求更多功能的场景中，ApplicationContext的容器比较合适。
+4.2、BeanFactory的对象注册和依赖绑定方式
+	4.2.1、直接编码方式
+		DefaultListableBeanFactory implments BeanFavtory ，BeanDefinitionRegistry（Bean注册管理）
+	4.2.2、外部配置文件方式
+		Spring的IOC容器支持两种配置文件格式：Properties文件和XML文件（也可以引入自己的文件格式）
+		根据不同的外部配置文件格式，给出相应的BeanDefinitionReader实现类，由BeanDefinitionReader相应实现类负责将相应的而配置文件
+	内容读取并映射到BeanDefinition，然后将映射后的BeanDefinition注册到一个BeanDefinitionRegistry，之后BeanDefinitionRegistry即
+	完成Bean的注册和加载。
+		（1）、Properties配置格式的加载
+			public static void main(String[] args){	
+				DefaultListableBeanFactory beanRegistry = new DefaultListableBeanFactory();
+				BeanFactory container = (BeanFactory)bindViaPropertiesFile(beanRegistry);
+				FXNewsProvider newsProvider = (FXNewsProvider)container.getBean("djNewsProvider");
+				newsProvider.getAndPersistNews();
+			}
+			
+			public static BeanFactory bindViaPropertiesFile(BeanDefinitionRegistry registry){
+				PropertiesBeanDefinitionReader reader = new PropertiesBeanDefinitionReader(registry);
+				reader.loadBeanDefinitions("classpath:../../binding-config.properties");
+				return (BeanFactory)registry;	
+			}
+		（2）、XML配置格式的加载
+				public static BeanFactory bindViaXMLFile(BeanDefinitionRegistry registry){ 
+					XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(registry);
+					reader.loadBeanDefinitions("classpath:../news-config.xml");
+					return (BeanFactory)registry; 
+					// 或者直接
+					//return new XmlBeanFactory(new ClassPathResource("../news-config.xml"));
+				}
+				
+				除了提供XmlBeanDefinitionReader用于XML格式配置文件的加载，Spring还在DefaultListableBeanFactory的基础上构建了
+			简化XML格式配置加载的XmlBeanFactory实现。从以上代码最后注释掉的一行，你可以看到使用了XmlBeanFactory之后，完成XML
+			的加载和BeanFactory的初始化是多么简单。
+	4.2.3、注解方式
 
 				
