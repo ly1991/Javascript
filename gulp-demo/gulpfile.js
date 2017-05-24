@@ -2,17 +2,17 @@
  * Created by ly on 17/4/12.
  */
 var gulp = require('gulp');
-    less = require('gulp-less');
-    minify = require('gulp-minify');
-    del = require('del');
-    cwd = process.cwd();
-    copy = require('copy');
-    uglify = require('gulp-uglify');
-    concat = require('gulp-concat');
-    minifyCSS = require('gulp-minify-css');
-    imgmin = require('gulp-imagemin');
-    htmlmin = require('gulp-htmlmin');
-    htmlReplace = require("gulp-html-replace");
+    // less = require('gulp-less');
+    // minify = require('gulp-minify');
+    // del = require('del');
+    // cwd = process.cwd();
+    // copy = require('copy');
+    // uglify = require('gulp-uglify');
+    // concat = require('gulp-concat');
+    // minifyCSS = require('gulp-minify-css');
+    // imgmin = require('gulp-imagemin');
+    // htmlmin = require('gulp-htmlmin');
+    // htmlReplace = require("gulp-html-replace");
     connect = require('gulp-connect');
 
 
@@ -106,7 +106,7 @@ gulp.task('watch',function () {
 
 gulp.task('connect', function() {
     connect.server({
-        root:'dest',
+        root:'v',
         livereload: true,
         port: 1234
     });
