@@ -10,6 +10,18 @@
     <div id="app">
         <div>输入：{{message}}</div>
         <input v-model="message"/>
+
+        <input type="button" value="click me" onclick="alert('event.type')"/>
+
+        <script type="text/javascript">
+
+            var btn = document.getElementById('mybtn');
+            btn.addEventListener('click',function () {
+                alert('clicked');
+            })
+
+        </script>
+
     </div>
 </body>
 </html>
