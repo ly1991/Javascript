@@ -6,7 +6,4 @@ var http = require('http');
 var numCPUs = require('os').cpus().length;
 
 console.log(numCPUs);
-console.log(require('os').cpus());
-console.log(require('os').homedir());
-console.log(require('os').userInfo());
-console.log(require('os'));
+
