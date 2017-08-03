@@ -16,8 +16,6 @@ let PersonModel = db.model('Test',PersonSchema);
 //如果没有发布，上一段代码将会异常
 
 let personEntity = new PersonModel({name:'test'});
-//打印这个实体的名字看看
-console.log(personEntity.name); //Krouky
 
 
 personEntity.save();  //执行完成后，数据库就有该数据了
